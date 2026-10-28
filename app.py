@@ -726,7 +726,7 @@ with tab_auto:
                 {
                     "Level": ["Primary", "Junior & Senior High", "College"],
                     "Institution": ["Basic Education", "Science & Technology Track", "BS Computer Science"],
-                    "Period": ["2011 - 2017", "2017 - 2023", "2023 - Present"],
+                    "Period": ["2012 - 2018", "2018 - 2024", "2024 - Present"],
                 }
             )
         )
