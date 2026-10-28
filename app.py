@@ -4,6 +4,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import streamlit as st
+import altair as alt
 
 # ---------------------------------------------------------------------------
 # PROFILE CONFIGURATION
@@ -84,9 +85,16 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
 
-    st.markdown(f"**{NAME}**")
-    st.caption(f"{PROGRAM} • {YEAR}")
-    st.caption(SECTION)
+    st.markdown(
+        f"""
+        <div class="sidebar-meta-block">
+            <div class="sidebar-name-darkened">{NAME}</div>
+            <div class="sidebar-sub-darkened">{PROGRAM} • {YEAR}</div>
+            <div class="sidebar-sub-darkened">{SECTION}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.markdown("---")
     st.markdown("### Profiles")
@@ -129,7 +137,7 @@ with st.sidebar:
     )
 
 # ---------------------------------------------------------------------------
-# DYNAMIC THEME TOKENS
+# DYNAMIC THEME TOKENS & ROBUST STYLES
 # ---------------------------------------------------------------------------
 if is_dark:
     ACCENT = "#E05A38"
@@ -144,6 +152,8 @@ if is_dark:
     INPUT_BG = "#161B22"
     SHADOW = "0 8px 24px rgba(0, 0, 0, 0.45)"
     ACTIVE_TAB_SHADOW = "0 4px 14px rgba(224, 90, 56, 0.4)"
+    NAME_COLOR = "#FFFFFF"
+    SUB_COLOR = "#D1D5DB"
 else:
     ACCENT = "#B5543A"
     BG_COLOR = "#FAF7F2"
@@ -157,6 +167,19 @@ else:
     INPUT_BG = "#FFFFFF"
     SHADOW = "0 6px 18px rgba(31, 27, 22, 0.06)"
     ACTIVE_TAB_SHADOW = "0 4px 14px rgba(181, 84, 58, 0.3)"
+    NAME_COLOR = "#0F172A"
+    SUB_COLOR = "#334155"
+
+def themed(chart):
+    return (
+        chart.configure(background=SURFACE)
+        .configure_view(stroke=None)
+        .configure_axis(
+            labelColor=TEXT_MUTED, titleColor=TEXT_MUTED,
+            gridColor=BORDER_COLOR, domainColor=BORDER_COLOR, tickColor=BORDER_COLOR,
+        )
+        .configure_legend(labelColor=TEXT_MAIN, titleColor=TEXT_MAIN)
+    )
 
 st.markdown(
     f"""
@@ -176,11 +199,15 @@ st.markdown(
   --input-bg: {INPUT_BG};
   --shadow: {SHADOW};
   --active-tab-shadow: {ACTIVE_TAB_SHADOW};
+  --name-color: {NAME_COLOR};
+  --sub-color: {SUB_COLOR};
   --radius: 12px;
 }}
 
-/* ELIMINATE TOP WHITE BAR */
+/* ELIMINATE TOP HEADER & WHITE BAR */
 header[data-testid="stHeader"],
+header[data-testid="stHeader"] > div,
+.stApp > header,
 [data-testid="stHeader"] {{
   background-color: var(--bg-color) !important;
   background: var(--bg-color) !important;
@@ -191,11 +218,7 @@ header[data-testid="stHeader"],
   display: none !important;
 }}
 
-.stApp > header {{
-  background-color: var(--bg-color) !important;
-}}
-
-/* BASE & TYPOGRAPHY */
+/* GLOBAL APP BASE */
 .stApp {{
   background-color: var(--bg-color) !important;
   color: var(--text-main) !important;
@@ -217,9 +240,15 @@ p, span, label, div {{
   color: var(--text-main);
 }}
 
-/* SIDEBAR DARKMODE TEXT & COMPONENT REPAIR */
-[data-testid="stSidebar"] {{
+/* SIDEBAR REPAIR */
+section[data-testid="stSidebar"],
+section[data-testid="stSidebar"] > div,
+section[data-testid="stSidebar"] div[data-testid="stSidebarContent"],
+section[data-testid="stSidebar"] div[data-testid="stSidebarUserContent"],
+[data-testid="stSidebar"],
+[data-testid="stSidebar"] > div {{
   background-color: var(--sidebar-bg) !important;
+  background: var(--sidebar-bg) !important;
   border-right: 1px solid var(--border) !important;
 }}
 
@@ -243,6 +272,25 @@ p, span, label, div {{
 
 [data-testid="stSidebar"] hr {{
   border-color: var(--border) !important;
+}}
+
+/* DARKENED SIDEBAR PROFILE INFO */
+.sidebar-meta-block {{
+  margin: 0.6rem 0 1rem;
+}}
+.sidebar-name-darkened {{
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--name-color) !important;
+  line-height: 1.25;
+  margin-bottom: 0.25rem;
+}}
+.sidebar-sub-darkened {{
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--sub-color) !important;
+  line-height: 1.45;
 }}
 
 .sidebar-avatar-placeholder {{
@@ -393,7 +441,7 @@ p, span, label, div {{
   color: var(--text-main) !important;
 }}
 
-/* MODERN CONTROLS & BUTTONS */
+/* BUTTONS & LINKS */
 .stButton > button,
 .stDownloadButton > button,
 .stLinkButton > a,
@@ -424,74 +472,219 @@ p, span, label, div {{
   transform: scale(0.98) !important;
 }}
 
-/* SEARCH BARS, SELECTORS & INPUTS (DARK/LIGHT MODE FIX) */
-[data-baseweb="input"],
-[data-baseweb="base-input"],
-[data-baseweb="textarea"],
-[data-baseweb="select"] > div,
-[data-baseweb="select"] div[role="combobox"] {{
+/* SEARCH BARS, TEXTAREAS & INPUTS */
+div[data-testid="stTextArea"] div[data-baseweb="textarea"],
+div[data-testid="stTextArea"] textarea,
+div[data-testid="stTextInput"] div[data-baseweb="base-input"],
+div[data-testid="stTextInput"] div[data-baseweb="input"],
+div[data-testid="stTextInput"] input,
+textarea {{
   background-color: var(--input-bg) !important;
-  border-color: var(--border) !important;
+  background: var(--input-bg) !important;
+  color: var(--text-main) !important;
+  -webkit-text-fill-color: var(--text-main) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 9px !important;
+}}
+
+div[data-testid="stTextArea"] textarea::placeholder,
+div[data-testid="stTextInput"] input::placeholder,
+textarea::placeholder,
+input::placeholder {{
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted) !important;
+  opacity: 0.8 !important;
+}}
+
+div[data-testid="stTextArea"] div[data-baseweb="textarea"]:focus-within,
+div[data-testid="stTextInput"] div[data-baseweb="base-input"]:focus-within {{
+  border-color: var(--accent) !important;
+}}
+
+/* SELECTBOX & MULTISELECT CONTAINERS */
+div[data-testid="stSelectbox"] div[data-baseweb="select"],
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+div[data-testid="stMultiSelect"] div[data-baseweb="select"],
+div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
+.stSelectbox > div > div,
+.stMultiSelect > div > div,
+div[data-baseweb="select"],
+div[data-baseweb="select"] > div {{
+  background-color: var(--input-bg) !important;
+  background: var(--input-bg) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 9px !important;
   color: var(--text-main) !important;
 }}
 
-[data-baseweb="input"] input,
-[data-baseweb="base-input"] input,
-[data-baseweb="textarea"] textarea,
-input[type="text"],
-textarea {{
+div[data-testid="stSelectbox"] div[data-baseweb="select"] *,
+div[data-testid="stMultiSelect"] div[data-baseweb="select"] * {{
+  color: var(--text-main) !important;
+}}
+
+/* SELECT TEXT (selected value + typed search text) */
+div[data-baseweb="select"] input,
+div[data-baseweb="select"] [value],
+div[data-baseweb="select"] div {{
+  color: var(--text-main) !important;
+  -webkit-text-fill-color: var(--text-main) !important;
+}}
+
+/* ARROW / CLEAR ICONS (fixes the white square) */
+div[data-baseweb="select"] svg,
+[data-baseweb="tag"] svg {{
+  fill: var(--text-main) !important;
+  color: var(--text-main) !important;
+  background: transparent !important;
+  opacity: 0.9 !important;
+}}
+/* the invisible bounding-box path must stay invisible */
+div[data-baseweb="select"] svg path[fill="none"],
+[data-baseweb="tag"] svg path[fill="none"],
+div[data-baseweb="select"] svg rect,
+[data-baseweb="tag"] svg rect {{
+  fill: none !important;
+}}
+div[data-baseweb="select"] [role="button"],
+div[data-baseweb="select"] [data-baseweb="icon"],
+div[data-baseweb="select"] svg {{
   background-color: transparent !important;
-  color: var(--text-main) !important;
-  border: none !important;
 }}
 
-input::placeholder,
-textarea::placeholder {{
-  color: var(--text-muted) !important;
-  opacity: 0.8 !important;
-}}
-
-[data-baseweb="input"]:focus-within,
-[data-baseweb="textarea"]:focus-within,
-[data-baseweb="select"] > div:focus-within {{
-  border-color: var(--accent) !important;
-}}
-
-/* DROPDOWN MENUS & MULTISELECT TAGS */
-[data-baseweb="popover"],
-[data-baseweb="menu"],
-ul[role="listbox"],
-li[role="option"] {{
-  background-color: var(--surface) !important;
-  color: var(--text-main) !important;
-  border-color: var(--border) !important;
-}}
-
-li[role="option"]:hover,
-li[role="option"][aria-selected="true"] {{
-  background-color: var(--surface-hover) !important;
-  color: var(--accent) !important;
-}}
-
+div[data-testid="stMultiSelect"] [data-baseweb="tag"],
 [data-baseweb="tag"] {{
   background-color: var(--pill-bg) !important;
   border: 1px solid var(--border) !important;
 }}
-
 [data-baseweb="tag"] span {{
   color: var(--text-main) !important;
 }}
 
-[data-testid="stForm"] {{
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  padding: 1.5rem;
-  box-shadow: var(--shadow);
+/* DROPDOWN POPOVER (renders in a portal, so match everything inside it) */
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] *:not(svg):not(path),
+div[data-baseweb="layer"] ul,
+div[data-baseweb="layer"] li,
+[data-testid="stSelectboxVirtualDropdown"],
+[data-testid="stSelectboxVirtualDropdown"] * {{
+  background-color: var(--surface) !important;
+  background-image: none !important;
+  color: var(--text-main) !important;
+  -webkit-text-fill-color: var(--text-main) !important;
+  border-color: var(--border) !important;
 }}
 
-/* GRAPHS & CHARTS DARK/LIGHT HARMONIZATION */
+div[data-baseweb="popover"] {{
+  border: 1px solid var(--border) !important;
+  border-radius: 9px !important;
+  box-shadow: var(--shadow) !important;
+  overflow: hidden !important;
+}}
+
+/* hover / selected option */
+div[data-baseweb="popover"] li:hover,
+div[data-baseweb="popover"] li:hover *,
+div[data-baseweb="popover"] li[aria-selected="true"],
+div[data-baseweb="popover"] li[aria-selected="true"] *,
+div[data-baseweb="popover"] li[role="option"]:hover *:not(svg):not(path) {{
+  background-color: var(--surface-hover) !important;
+  color: var(--accent) !important;
+  -webkit-text-fill-color: var(--accent) !important;
+}}
+
+div[data-baseweb="popover"] hr {{
+  border-color: var(--border) !important;
+}}
+
+/* EXPANDER (FUN FACTS HEADER FIXED FOR DARK & LIGHT MODES) */
+details[data-testid="stExpander"],
+[data-testid="stExpander"] {{
+  background-color: var(--surface) !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  overflow: hidden !important;
+}}
+
+details[data-testid="stExpander"] summary,
+[data-testid="stExpander"] summary,
+.streamlit-expanderHeader {{
+  background-color: var(--surface) !important;
+  background: var(--surface) !important;
+  color: var(--text-main) !important;
+  border: none !important;
+  transition: background-color 0.2s ease !important;
+}}
+
+details[data-testid="stExpander"] summary:hover,
+[data-testid="stExpander"] summary:hover {{
+  background-color: var(--surface-hover) !important;
+  background: var(--surface-hover) !important;
+  color: var(--accent) !important;
+}}
+
+details[data-testid="stExpander"] summary *,
+[data-testid="stExpander"] summary * {{
+  color: var(--text-main) !important;
+}}
+
+details[data-testid="stExpander"] summary svg,
+[data-testid="stExpander"] summary svg {{
+  fill: var(--text-main) !important;
+  color: var(--text-main) !important;
+}}
+
+details[data-testid="stExpander"] [data-testid="stExpanderDetails"],
+[data-testid="stExpander"] [data-testid="stExpanderDetails"] {{
+  background-color: var(--surface) !important;
+  background: var(--surface) !important;
+  color: var(--text-main) !important;
+  border-top: 1px solid var(--border) !important;
+}}
+
+/* CONTACT FORM CONTAINER */
+div[data-testid="stForm"],
+.stForm {{
+  background-color: var(--surface) !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  padding: 1.5rem !important;
+  box-shadow: var(--shadow) !important;
+}}
+
+/* TABLES */
+div[data-testid="stTable"],
+div[data-testid="stTable"] > div,
+div[data-testid="stTable"] table {{
+  background-color: var(--surface) !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  color: var(--text-main) !important;
+  overflow: hidden !important;
+}}
+
+div[data-testid="stTable"] th {{
+  background-color: var(--pill-bg) !important;
+  background: var(--pill-bg) !important;
+  color: var(--text-main) !important;
+  border-bottom: 1px solid var(--border) !important;
+  font-weight: 700 !important;
+}}
+
+div[data-testid="stTable"] td {{
+  background-color: var(--surface) !important;
+  background: var(--surface) !important;
+  color: var(--text-main) !important;
+  border-bottom: 1px solid var(--border) !important;
+}}
+
+div[data-testid="stTable"] tr:hover td {{
+  background-color: var(--surface-hover) !important;
+}}
+
+/* GRAPHS AND CHARTS */
 [data-testid="stVegaLiteChart"] {{
   background: var(--surface) !important;
   border: 1px solid var(--border) !important;
@@ -509,40 +702,14 @@ li[role="option"][aria-selected="true"] {{
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
 }}
 
-[data-testid="stVegaLiteChart"] .role-axis path.domain {{
+[data-testid="stVegaLiteChart"] .role-axis path.domain,
+[data-testid="stVegaLiteChart"] .role-axis-tick line {{
   stroke: var(--border) !important;
 }}
 
 [data-testid="stVegaLiteChart"] .role-axis-grid line {{
   stroke: var(--border) !important;
   stroke-opacity: 0.5 !important;
-}}
-
-[data-testid="stVegaLiteChart"] .role-axis-tick line {{
-  stroke: var(--border) !important;
-}}
-
-/* TABLES & DATA FRAMES */
-[data-testid="stTable"] {{
-  background-color: var(--surface) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius) !important;
-  overflow: hidden;
-}}
-
-[data-testid="stTable"] table {{
-  color: var(--text-main) !important;
-}}
-
-[data-testid="stTable"] th {{
-  background-color: var(--pill-bg) !important;
-  color: var(--text-main) !important;
-  border-bottom: 1px solid var(--border) !important;
-}}
-
-[data-testid="stTable"] td {{
-  border-bottom: 1px solid var(--border) !important;
-  color: var(--text-main) !important;
 }}
 
 /* PROJECT CARDS */
@@ -604,6 +771,60 @@ li[role="option"][aria-selected="true"] {{
   text-align: center;
   padding: 2rem 0 1rem;
 }}
+
+/* REMOVE WHITE LINE ON SIDEBAR EDGE */
+section[data-testid="stSidebar"],
+section[data-testid="stSidebar"] > div,
+[data-testid="stSidebar"] > div,
+div[data-testid="stSidebarContent"],
+div[data-testid="stSidebarUserContent"] {{
+  border-right: none !important;
+  box-shadow: none !important;
+}}
+div[data-testid="stSidebarContent"] {{
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  overflow-x: hidden !important;
+}}
+div[data-testid="stSidebarContent"]::-webkit-scrollbar,
+section[data-testid="stSidebar"] *::-webkit-scrollbar {{
+  display: none !important;
+  width: 0 !important;
+}}
+div[data-testid="stSidebarResizeHandle"],
+[data-testid="stSidebar"] [class*="resize"] {{
+  display: none !important;
+}}
+
+/* INPUTS / SEARCH BARS: force theme colors in both modes */
+div[data-baseweb="input"],
+div[data-baseweb="base-input"],
+div[data-baseweb="textarea"],
+div[data-baseweb="select"] > div {{
+  background-color: var(--input-bg) !important;
+  border-color: var(--border) !important;
+}}
+div[data-baseweb="input"] input,
+div[data-baseweb="base-input"] input,
+div[data-baseweb="textarea"] textarea,
+div[data-baseweb="select"] input {{
+  background-color: transparent !important;
+  color: var(--text-main) !important;
+  -webkit-text-fill-color: var(--text-main) !important;
+  caret-color: var(--accent) !important;
+}}
+div[data-baseweb="select"] [class*="singleValue"],
+div[data-baseweb="select"] [data-baseweb="select"] div {{
+  color: var(--text-main) !important;
+}}
+
+/* SLIDERS / CHECKBOX / RADIO LABELS */
+div[data-testid="stSlider"] [data-testid="stTickBarMin"],
+div[data-testid="stSlider"] [data-testid="stTickBarMax"],
+div[data-testid="stSlider"] [data-testid="stSliderThumbValue"] {{
+  color: var(--text-main) !important;
+}}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -713,7 +934,7 @@ with tab_auto:
             pd.DataFrame(
                 {
                     "Level": ["Primary", "Junior & Senior High", "College"],
-                    "Institution": ["Basic Education", "Science, Technology, Engineering, and Mathematics", "BS Computer Science"],
+                    "Institution": ["Basic Education", "Science & Technology Track", "BS Computer Science"],
                     "Period": ["2011 - 2017", "2017 - 2023", "2023 - Present"],
                 }
             )
@@ -748,7 +969,7 @@ with tab_auto:
             }
         )
         max_year = st.slider("Filter milestones up to year:", 2021, 2025, 2025)
-        st.dataframe(milestones[milestones["Year"] <= max_year], hide_index=True, use_container_width=True)
+        st.table(milestones[milestones["Year"] <= max_year])
 
 # ---------------------------------------------------------------------------
 # TAB 3: SKILLS
@@ -773,13 +994,24 @@ with tab_skills:
         if filtered_skills.empty:
             st.warning("No skills match the current filter selection.")
         else:
-            st.dataframe(filtered_skills, hide_index=True, use_container_width=True)
+            st.table(filtered_skills)
 
     if not filtered_skills.empty:
         c_chart, c_progress = st.columns(2, gap="large")
         with c_chart:
             st.markdown("#### Competency Breakdown")
-            st.bar_chart(filtered_skills.set_index("Skill")["Level (1-10)"], color=ACCENT)
+            bar_df = filtered_skills.rename(columns={"Level (1-10)": "Level"})
+            bar = (
+                alt.Chart(bar_df)
+                .mark_bar(color=ACCENT, cornerRadiusTopLeft=4, cornerRadiusTopRight=4)
+                .encode(
+                    x=alt.X("Skill:N", sort=None, title=None, axis=alt.Axis(labelAngle=-30)),
+                    y=alt.Y("Level:Q", scale=alt.Scale(domain=[0, 10]), title="Level"),
+                    tooltip=["Skill", "Category", "Level", "Years"],
+                )
+                .properties(height=300)
+            )
+            st.altair_chart(themed(bar), use_container_width=True, theme=None)
         with c_progress:
             st.markdown("#### Primary Strengths")
             for _, row in filtered_skills.head(4).iterrows():
@@ -795,7 +1027,19 @@ with tab_skills:
         },
         index=months,
     )
-    st.line_chart(progress_data, color=[ACCENT, "#3B82F6"])
+    line_df = progress_data.reset_index().melt("index", var_name="Track", value_name="Level")
+    line = (
+        alt.Chart(line_df)
+        .mark_line(strokeWidth=3)
+        .encode(
+            x=alt.X("index:T", title=None, axis=alt.Axis(format="%b")),
+            y=alt.Y("Level:Q", scale=alt.Scale(domain=[0, 10])),
+            color=alt.Color("Track:N", scale=alt.Scale(range=[ACCENT, "#3B82F6"]), title=None),
+            tooltip=["Track", "Level"],
+        )
+        .properties(height=300)
+    )
+    st.altair_chart(themed(line), use_container_width=True, theme=None)
 
 # ---------------------------------------------------------------------------
 # TAB 4: PROJECTS (PIXELSHELF, PATHFINDER-ACCESS, FLOWSTATE)
@@ -890,7 +1134,7 @@ with tab_contact:
         if st.session_state.messages:
             st.markdown("---")
             st.caption("Submitted Messages (Session)")
-            st.dataframe(pd.DataFrame(st.session_state.messages), hide_index=True, use_container_width=True)
+            st.table(pd.DataFrame(st.session_state.messages))
 
 # ---------------------------------------------------------------------------
 # FOOTER
