@@ -730,6 +730,11 @@ with tab_auto:
                 }
             )
         )
+        if show_fun:
+            with st.expander("Fun Facts"):
+                st.write("- Went to elementary school at the age of 5.")
+                st.write("- Had first coding experience in junior high using pure HTML.")
+                st.write("- Loves Joshua Mikhail Reyes Acas <3.")
     with col_interests:
         section("Interests", "Fields and activities I pursue")
         interests = st.multiselect(
@@ -750,16 +755,16 @@ with tab_auto:
         section("Key Milestones")
         milestones = pd.DataFrame(
             {
-                "Year": [2021, 2023, 2024, 2025],
+                "Year": [2021, 2024, 2025, 2026],
                 "Milestone": [
-                    "Began programming with Python and basic web concepts",
+                    "Began programming with HTML and basic web concepts",
                     "Enrolled in BS Computer Science program",
                     "Engineered Android accessibility tools and full-stack projects",
                     "Developed PixelShelf vertical slicing architecture and advanced pipelines",
                 ],
             }
         )
-        max_year = st.slider("Filter milestones up to year:", 2021, 2025, 2025)
+        max_year = st.slider("Filter milestones up to year:", 2021, 2026, 2026)
         st.table(milestones[milestones["Year"] <= max_year])
 
 # ---------------------------------------------------------------------------
