@@ -1,10 +1,10 @@
 import os
 from datetime import datetime
 
+import altair as alt
 import numpy as np
 import pandas as pd
 import streamlit as st
-import altair as alt
 
 # ---------------------------------------------------------------------------
 # PROFILE CONFIGURATION
@@ -106,16 +106,6 @@ with st.sidebar:
     show_fun = st.checkbox("Show fun facts", value=True)
 
     st.markdown("---")
-    st.markdown("### Theme")
-    theme_choice = st.radio(
-        "Theme Mode",
-        options=["🌙 Dark Mode", "☀️ Light Mode"],
-        index=0,
-        label_visibility="collapsed",
-    )
-    is_dark = "Dark" in theme_choice
-
-    st.markdown("---")
     st.markdown("### Export")
     bio_txt = (
         f"{NAME}\n{PROGRAM}, {YEAR}\n{SECTION}\n"
@@ -137,46 +127,36 @@ with st.sidebar:
     )
 
 # ---------------------------------------------------------------------------
-# DYNAMIC THEME TOKENS & ROBUST STYLES
+# PERMANENT DARK THEME TOKENS & STYLES
 # ---------------------------------------------------------------------------
-if is_dark:
-    ACCENT = "#E05A38"
-    BG_COLOR = "#0D1117"
-    SIDEBAR_BG = "#161B22"
-    SURFACE = "#1E2430"
-    SURFACE_HOVER = "#273040"
-    TEXT_MAIN = "#F0F6FC"
-    TEXT_MUTED = "#9DA7B3"
-    BORDER_COLOR = "#30363D"
-    PILL_BG = "#21262D"
-    INPUT_BG = "#161B22"
-    SHADOW = "0 8px 24px rgba(0, 0, 0, 0.45)"
-    ACTIVE_TAB_SHADOW = "0 4px 14px rgba(224, 90, 56, 0.4)"
-    NAME_COLOR = "#FFFFFF"
-    SUB_COLOR = "#D1D5DB"
-else:
-    ACCENT = "#B5543A"
-    BG_COLOR = "#FAF7F2"
-    SIDEBAR_BG = "#F1ECE2"
-    SURFACE = "#FFFFFF"
-    SURFACE_HOVER = "#FBF9F5"
-    TEXT_MAIN = "#1F1B16"
-    TEXT_MUTED = "#6B645B"
-    BORDER_COLOR = "#E6DFD3"
-    PILL_BG = "#F4EFE6"
-    INPUT_BG = "#FFFFFF"
-    SHADOW = "0 6px 18px rgba(31, 27, 22, 0.06)"
-    ACTIVE_TAB_SHADOW = "0 4px 14px rgba(181, 84, 58, 0.3)"
-    NAME_COLOR = "#0F172A"
-    SUB_COLOR = "#334155"
+ACCENT = "#E05A38"
+BG_COLOR = "#0D1117"
+SIDEBAR_BG = "#161B22"
+SURFACE = "#1E2430"
+SURFACE_HOVER = "#273040"
+TEXT_MAIN = "#F0F6FC"
+TEXT_MUTED = "#9DA7B3"
+BORDER_COLOR = "#30363D"
+PILL_BG = "#21262D"
+INPUT_BG = "#161B22"
+SHADOW = "0 8px 24px rgba(0, 0, 0, 0.45)"
+ACTIVE_TAB_SHADOW = "0 4px 14px rgba(224, 90, 56, 0.4)"
+NAME_COLOR = "#FFFFFF"
+SUB_COLOR = "#D1D5DB"
 
 def themed(chart):
     return (
-        chart.configure(background=SURFACE)
+        chart.configure(
+            background="transparent",
+            autosize=alt.AutoSizeParams(type="fit", contains="padding"),
+        )
         .configure_view(stroke=None)
         .configure_axis(
-            labelColor=TEXT_MUTED, titleColor=TEXT_MUTED,
-            gridColor=BORDER_COLOR, domainColor=BORDER_COLOR, tickColor=BORDER_COLOR,
+            labelColor=TEXT_MUTED,
+            titleColor=TEXT_MUTED,
+            gridColor=BORDER_COLOR,
+            domainColor=BORDER_COLOR,
+            tickColor=BORDER_COLOR,
         )
         .configure_legend(labelColor=TEXT_MAIN, titleColor=TEXT_MAIN)
     )
@@ -240,7 +220,7 @@ p, span, label, div {{
   color: var(--text-main);
 }}
 
-/* SIDEBAR REPAIR */
+/* SIDEBAR */
 section[data-testid="stSidebar"],
 section[data-testid="stSidebar"] > div,
 section[data-testid="stSidebar"] div[data-testid="stSidebarContent"],
@@ -249,7 +229,8 @@ section[data-testid="stSidebar"] div[data-testid="stSidebarUserContent"],
 [data-testid="stSidebar"] > div {{
   background-color: var(--sidebar-bg) !important;
   background: var(--sidebar-bg) !important;
-  border-right: 1px solid var(--border) !important;
+  border-right: none !important;
+  box-shadow: none !important;
 }}
 
 [data-testid="stSidebar"] p,
@@ -274,7 +255,6 @@ section[data-testid="stSidebar"] div[data-testid="stSidebarUserContent"],
   border-color: var(--border) !important;
 }}
 
-/* DARKENED SIDEBAR PROFILE INFO */
 .sidebar-meta-block {{
   margin: 0.6rem 0 1rem;
 }}
@@ -368,7 +348,7 @@ section[data-testid="stSidebar"] div[data-testid="stSidebarUserContent"],
   background: var(--accent);
 }}
 
-/* PROMINENT ANIMATED TAB BUTTONS */
+/* TABS */
 .stTabs [data-baseweb="tab-list"] {{
   display: flex;
   gap: 0.6rem;
@@ -441,7 +421,7 @@ section[data-testid="stSidebar"] div[data-testid="stSidebarUserContent"],
   color: var(--text-main) !important;
 }}
 
-/* BUTTONS & LINKS */
+/* BUTTONS */
 .stButton > button,
 .stDownloadButton > button,
 .stLinkButton > a,
@@ -467,12 +447,7 @@ section[data-testid="stSidebar"] div[data-testid="stSidebarUserContent"],
   box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
 }}
 
-.stButton > button:active,
-.stLinkButton > a:active {{
-  transform: scale(0.98) !important;
-}}
-
-/* SEARCH BARS, TEXTAREAS & INPUTS */
+/* INPUTS */
 div[data-testid="stTextArea"] div[data-baseweb="textarea"],
 div[data-testid="stTextArea"] textarea,
 div[data-testid="stTextInput"] div[data-baseweb="base-input"],
@@ -487,29 +462,10 @@ textarea {{
   border-radius: 9px !important;
 }}
 
-div[data-testid="stTextArea"] textarea::placeholder,
-div[data-testid="stTextInput"] input::placeholder,
-textarea::placeholder,
-input::placeholder {{
-  color: var(--text-muted) !important;
-  -webkit-text-fill-color: var(--text-muted) !important;
-  opacity: 0.8 !important;
-}}
-
-div[data-testid="stTextArea"] div[data-baseweb="textarea"]:focus-within,
-div[data-testid="stTextInput"] div[data-baseweb="base-input"]:focus-within {{
-  border-color: var(--accent) !important;
-}}
-
-/* SELECTBOX & MULTISELECT CONTAINERS */
 div[data-testid="stSelectbox"] div[data-baseweb="select"],
 div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
 div[data-testid="stMultiSelect"] div[data-baseweb="select"],
-div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
-.stSelectbox > div > div,
-.stMultiSelect > div > div,
-div[data-baseweb="select"],
-div[data-baseweb="select"] > div {{
+div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {{
   background-color: var(--input-bg) !important;
   background: var(--input-bg) !important;
   border: 1px solid var(--border) !important;
@@ -517,86 +473,14 @@ div[data-baseweb="select"] > div {{
   color: var(--text-main) !important;
 }}
 
-div[data-testid="stSelectbox"] div[data-baseweb="select"] *,
-div[data-testid="stMultiSelect"] div[data-baseweb="select"] * {{
-  color: var(--text-main) !important;
-}}
-
-/* SELECT TEXT (selected value + typed search text) */
-div[data-baseweb="select"] input,
-div[data-baseweb="select"] [value],
-div[data-baseweb="select"] div {{
-  color: var(--text-main) !important;
-  -webkit-text-fill-color: var(--text-main) !important;
-}}
-
-/* ARROW / CLEAR ICONS (fixes the white square) */
-div[data-baseweb="select"] svg,
-[data-baseweb="tag"] svg {{
-  fill: var(--text-main) !important;
-  color: var(--text-main) !important;
-  background: transparent !important;
-  opacity: 0.9 !important;
-}}
-/* the invisible bounding-box path must stay invisible */
-div[data-baseweb="select"] svg path[fill="none"],
-[data-baseweb="tag"] svg path[fill="none"],
-div[data-baseweb="select"] svg rect,
-[data-baseweb="tag"] svg rect {{
-  fill: none !important;
-}}
-div[data-baseweb="select"] [role="button"],
-div[data-baseweb="select"] [data-baseweb="icon"],
-div[data-baseweb="select"] svg {{
-  background-color: transparent !important;
-}}
-
-div[data-testid="stMultiSelect"] [data-baseweb="tag"],
-[data-baseweb="tag"] {{
-  background-color: var(--pill-bg) !important;
-  border: 1px solid var(--border) !important;
-}}
-[data-baseweb="tag"] span {{
-  color: var(--text-main) !important;
-}}
-
-/* DROPDOWN POPOVER (renders in a portal, so match everything inside it) */
 div[data-baseweb="popover"],
-div[data-baseweb="popover"] *:not(svg):not(path),
-div[data-baseweb="layer"] ul,
-div[data-baseweb="layer"] li,
-[data-testid="stSelectboxVirtualDropdown"],
-[data-testid="stSelectboxVirtualDropdown"] * {{
+div[data-baseweb="popover"] *:not(svg):not(path) {{
   background-color: var(--surface) !important;
-  background-image: none !important;
   color: var(--text-main) !important;
   -webkit-text-fill-color: var(--text-main) !important;
-  border-color: var(--border) !important;
 }}
 
-div[data-baseweb="popover"] {{
-  border: 1px solid var(--border) !important;
-  border-radius: 9px !important;
-  box-shadow: var(--shadow) !important;
-  overflow: hidden !important;
-}}
-
-/* hover / selected option */
-div[data-baseweb="popover"] li:hover,
-div[data-baseweb="popover"] li:hover *,
-div[data-baseweb="popover"] li[aria-selected="true"],
-div[data-baseweb="popover"] li[aria-selected="true"] *,
-div[data-baseweb="popover"] li[role="option"]:hover *:not(svg):not(path) {{
-  background-color: var(--surface-hover) !important;
-  color: var(--accent) !important;
-  -webkit-text-fill-color: var(--accent) !important;
-}}
-
-div[data-baseweb="popover"] hr {{
-  border-color: var(--border) !important;
-}}
-
-/* EXPANDER (FUN FACTS HEADER FIXED FOR DARK & LIGHT MODES) */
+/* EXPANDER */
 details[data-testid="stExpander"],
 [data-testid="stExpander"] {{
   background-color: var(--surface) !important;
@@ -604,42 +488,6 @@ details[data-testid="stExpander"],
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;
   overflow: hidden !important;
-}}
-
-details[data-testid="stExpander"] summary,
-[data-testid="stExpander"] summary,
-.streamlit-expanderHeader {{
-  background-color: var(--surface) !important;
-  background: var(--surface) !important;
-  color: var(--text-main) !important;
-  border: none !important;
-  transition: background-color 0.2s ease !important;
-}}
-
-details[data-testid="stExpander"] summary:hover,
-[data-testid="stExpander"] summary:hover {{
-  background-color: var(--surface-hover) !important;
-  background: var(--surface-hover) !important;
-  color: var(--accent) !important;
-}}
-
-details[data-testid="stExpander"] summary *,
-[data-testid="stExpander"] summary * {{
-  color: var(--text-main) !important;
-}}
-
-details[data-testid="stExpander"] summary svg,
-[data-testid="stExpander"] summary svg {{
-  fill: var(--text-main) !important;
-  color: var(--text-main) !important;
-}}
-
-details[data-testid="stExpander"] [data-testid="stExpanderDetails"],
-[data-testid="stExpander"] [data-testid="stExpanderDetails"] {{
-  background-color: var(--surface) !important;
-  background: var(--surface) !important;
-  color: var(--text-main) !important;
-  border-top: 1px solid var(--border) !important;
 }}
 
 /* CONTACT FORM CONTAINER */
@@ -658,7 +506,6 @@ div[data-testid="stTable"],
 div[data-testid="stTable"] > div,
 div[data-testid="stTable"] table {{
   background-color: var(--surface) !important;
-  background: var(--surface) !important;
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;
   color: var(--text-main) !important;
@@ -667,34 +514,34 @@ div[data-testid="stTable"] table {{
 
 div[data-testid="stTable"] th {{
   background-color: var(--pill-bg) !important;
-  background: var(--pill-bg) !important;
   color: var(--text-main) !important;
   border-bottom: 1px solid var(--border) !important;
   font-weight: 700 !important;
 }}
 
-div[data-testid="stTable"] td {{
-  background-color: var(--surface) !important;
-  background: var(--surface) !important;
-  color: var(--text-main) !important;
-  border-bottom: 1px solid var(--border) !important;
-}}
-
-div[data-testid="stTable"] tr:hover td {{
-  background-color: var(--surface-hover) !important;
-}}
-
-/* GRAPHS AND CHARTS */
+/* CHART OVERFLOW FIX */
 [data-testid="stVegaLiteChart"] {{
   background: var(--surface) !important;
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;
-  padding: 1rem 0.5rem 0.5rem !important;
+  padding: 1rem 1rem 0.5rem !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
   box-shadow: var(--shadow);
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}}
+
+[data-testid="stVegaLiteChart"] > div {{
+  max-width: 100% !important;
+  overflow: hidden !important;
 }}
 
 [data-testid="stVegaLiteChart"] svg {{
   background: transparent !important;
+  display: block !important;
+  max-width: 100% !important;
 }}
 
 [data-testid="stVegaLiteChart"] text {{
@@ -771,71 +618,15 @@ div[data-testid="stTable"] tr:hover td {{
   text-align: center;
   padding: 2rem 0 1rem;
 }}
-
-/* REMOVE WHITE LINE ON SIDEBAR EDGE */
-section[data-testid="stSidebar"],
-section[data-testid="stSidebar"] > div,
-[data-testid="stSidebar"] > div,
-div[data-testid="stSidebarContent"],
-div[data-testid="stSidebarUserContent"] {{
-  border-right: none !important;
-  box-shadow: none !important;
-}}
-div[data-testid="stSidebarContent"] {{
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-  overflow-x: hidden !important;
-}}
-div[data-testid="stSidebarContent"]::-webkit-scrollbar,
-section[data-testid="stSidebar"] *::-webkit-scrollbar {{
-  display: none !important;
-  width: 0 !important;
-}}
-div[data-testid="stSidebarResizeHandle"],
-[data-testid="stSidebar"] [class*="resize"] {{
-  display: none !important;
-}}
-
-/* INPUTS / SEARCH BARS: force theme colors in both modes */
-div[data-baseweb="input"],
-div[data-baseweb="base-input"],
-div[data-baseweb="textarea"],
-div[data-baseweb="select"] > div {{
-  background-color: var(--input-bg) !important;
-  border-color: var(--border) !important;
-}}
-div[data-baseweb="input"] input,
-div[data-baseweb="base-input"] input,
-div[data-baseweb="textarea"] textarea,
-div[data-baseweb="select"] input {{
-  background-color: transparent !important;
-  color: var(--text-main) !important;
-  -webkit-text-fill-color: var(--text-main) !important;
-  caret-color: var(--accent) !important;
-}}
-div[data-baseweb="select"] [class*="singleValue"],
-div[data-baseweb="select"] [data-baseweb="select"] div {{
-  color: var(--text-main) !important;
-}}
-
-/* SLIDERS / CHECKBOX / RADIO LABELS */
-div[data-testid="stSlider"] [data-testid="stTickBarMin"],
-div[data-testid="stSlider"] [data-testid="stTickBarMax"],
-div[data-testid="stSlider"] [data-testid="stSliderThumbValue"] {{
-  color: var(--text-main) !important;
-}}
-
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-
 def section(title: str, sub: str = ""):
     st.markdown(f'<div class="section-title">{title}</div>', unsafe_allow_html=True)
     if sub:
         st.markdown(f'<div class="section-sub">{sub}</div>', unsafe_allow_html=True)
-
 
 # ---------------------------------------------------------------------------
 # HERO
@@ -869,7 +660,7 @@ m4.metric("Avg. Rating", f"{skills['Level (1-10)'].mean():.1f} / 10")
 st.write("")
 
 # ---------------------------------------------------------------------------
-# PROMINENT ANIMATED TABS
+# TABS
 # ---------------------------------------------------------------------------
 tab_about, tab_auto, tab_skills, tab_projects, tab_contact = st.tabs(
     ["About", "Autobiography", "Skills", "Projects", "Contact"]
@@ -1003,9 +794,23 @@ with tab_skills:
             bar_df = filtered_skills.rename(columns={"Level (1-10)": "Level"})
             bar = (
                 alt.Chart(bar_df)
-                .mark_bar(color=ACCENT, cornerRadiusTopLeft=4, cornerRadiusTopRight=4)
+                .mark_bar(
+                    color=ACCENT,
+                    cornerRadiusTopLeft=4,
+                    cornerRadiusTopRight=4,
+                )
                 .encode(
-                    x=alt.X("Skill:N", sort=None, title=None, axis=alt.Axis(labelAngle=-30)),
+                    x=alt.X(
+                        "Skill:N",
+                        sort=None,
+                        title=None,
+                        scale=alt.Scale(paddingInner=0.25, paddingOuter=0.15),
+                        axis=alt.Axis(
+                            labelAngle=-30,
+                            labelLimit=120,
+                            labelPadding=6,
+                        ),
+                    ),
                     y=alt.Y("Level:Q", scale=alt.Scale(domain=[0, 10]), title="Level"),
                     tooltip=["Skill", "Category", "Level", "Years"],
                 )
@@ -1042,7 +847,7 @@ with tab_skills:
     st.altair_chart(themed(line), use_container_width=True, theme=None)
 
 # ---------------------------------------------------------------------------
-# TAB 4: PROJECTS (PIXELSHELF, PATHFINDER-ACCESS, FLOWSTATE)
+# TAB 4: PROJECTS
 # ---------------------------------------------------------------------------
 with tab_projects:
     section("Featured Projects", "Open-source work, tools, and applications")
